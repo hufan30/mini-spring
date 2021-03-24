@@ -2,6 +2,7 @@ package com.gupaoedu.vip.spring.formework.beans.support;
 
 import com.gupaoedu.vip.spring.formework.beans.config.GPBeanDefinition;
 import com.gupaoedu.vip.spring.formework.context.support.GPAbstractApplicationContext;
+import lombok.extern.log4j.Log4j;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
