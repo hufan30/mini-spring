@@ -1,8 +1,11 @@
 package com.gupaoedu.vip.spring.formework.context;
 
+import com.gupaoedu.vip.spring.formework.beans.config.GPBeanDefinition;
 import com.gupaoedu.vip.spring.formework.beans.support.GPDefaultListableBeanFactory;
 import com.gupaoedu.vip.spring.formework.core.GPBeanFactory;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
 
 @Slf4j
 public class GPApplicationContext extends GPDefaultListableBeanFactory implements GPBeanFactory {
@@ -21,6 +24,16 @@ public class GPApplicationContext extends GPDefaultListableBeanFactory implement
         }
     }
 
+    @Override
+    public void refresh() throws Exception {
+        //1、定位，定位配置文件
+
+        //2、加载配置文件，扫描相关的类，把它们封装成BeanDefinition
+
+        //3、注册，把配置信息放到容器里面(伪IOC容器)
+
+        //4、把不是延时加载的类，有提前初始化
+    }
 
     @Override
     public Object getBean(String beanName) throws Exception {
