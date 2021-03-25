@@ -85,7 +85,10 @@ public class GPBeanDefinitionReader {
         }
     }
 
-
+    /**
+     * 根据已经扫描到的类，将其解析为beanDefinition
+     * @return
+     */
     public List<GPBeanDefinition> loadBeanDefinitions() {
         return null;
     }
