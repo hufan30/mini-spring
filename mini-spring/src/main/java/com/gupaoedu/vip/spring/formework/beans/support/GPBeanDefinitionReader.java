@@ -3,6 +3,7 @@ package com.gupaoedu.vip.spring.formework.beans.support;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -44,17 +45,32 @@ public class GPBeanDefinitionReader {
         doScanner(config.getProperty(SCAN_PACKAGE));
     }
 
+    /**
+     * 1.转换为文件路径，实际上就是把.替换为/就OK了
+     * 2.然后把扫描路径里面的class,全部添加到registyBeanClasses
+     * 这里的套路是判断路径对应的file，是不是文件夹，是就继续scan
+     * 是文件就添加name到全部添加到registyBeanClasses
+     * @param scanPackage
+     */
     private void doScanner(String scanPackage) {
-        //转换为文件路径，实际上就是把.替换为/就OK了
+
         /**
-         * 然后把扫描路径里面的class,全部添加到registyBeanClasses
-         * 这里的套路是判断路径对应的file，是不是文件夹，是就继续scan
-         * 是文件就添加name到全部添加到registyBeanClasses
+         * 参数为com.gupaoedu.vip.spring.demo
+         * 书上代码版本，拿到的结果是file:/G:/spring5-samples/gupaoedu-vip-spring-2.0/target/classes/com/gupaoedu/vip/spring/demo/
+         * 从target中拿结果
          */
-        URL resource = this.getClass().getResource("/"+scanPackage.replaceAll("\\.","/"));
+        URL url = this.getClass().getResource("/" + scanPackage.replaceAll("\\.", "/"));
+        File classPath = new File(url.getFile());
 
+        /**
+         * 实验测试版本，filePath拿不到,
+         * user,dir拿到的是工程路径，这里是tomcat的安装路径，不是这个代码工程的路径
+         */
+        String userDir = System.getProperty("user.dir");
+        String filePath =  "/" + scanPackage.replaceAll("\\.", "/");
+        File classPath2 = new File(userDir);
 
-
+        
     }
 
 
