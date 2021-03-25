@@ -1,6 +1,7 @@
 package com.gupaoedu.vip.spring.formework.beans.support;
 
 
+import com.gupaoedu.vip.spring.formework.beans.config.GPBeanDefinition;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -85,4 +86,7 @@ public class GPBeanDefinitionReader {
     }
 
 
+    public List<GPBeanDefinition> loadBeanDefinitions() {
+        return null;
+    }
 }

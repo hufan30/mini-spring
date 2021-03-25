@@ -31,6 +31,7 @@ public class GPApplicationContext extends GPDefaultListableBeanFactory implement
         //1、定位，定位配置文件
         reader = new GPBeanDefinitionReader(this.configLocations);
         //2、加载配置文件，扫描相关的类，把它们封装成BeanDefinition
+        List<GPBeanDefinition> beanDefinitions = reader.loadBeanDefinitions();
 
         //3、注册，把配置信息放到容器里面(伪IOC容器)
 
