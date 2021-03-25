@@ -20,7 +20,7 @@ public class GPBeanDefinitionReader {
 
     private static final String SCAN_PACKAGE = "scanPackage";
 
-    public GPBeanDefinitionReader(String[] configLocations){
+    public GPBeanDefinitionReader(String[] configLocations) {
         /**
          * 这里是从web.xml中穿过来的参数，只是说明classpath:application.properties
          * 具体的内容还需要去读取；
@@ -29,8 +29,8 @@ public class GPBeanDefinitionReader {
         try {
             config.load(inputStream);
         } catch (IOException e) {
-           log.info(e.getMessage());
-        }finally {
+            log.info(e.getMessage());
+        } finally {
             /**
              * 注意这里输入输出流，需要关闭close
              */
@@ -50,6 +50,7 @@ public class GPBeanDefinitionReader {
      * 2.然后把扫描路径里面的class,全部添加到registyBeanClasses
      * 这里的套路是判断路径对应的file，是不是文件夹，是就继续scan
      * 是文件就添加name到全部添加到registyBeanClasses
+     *
      * @param scanPackage
      */
     private void doScanner(String scanPackage) {
@@ -67,10 +68,20 @@ public class GPBeanDefinitionReader {
          * user,dir拿到的是工程路径，这里是tomcat的安装路径，不是这个代码工程的路径
          */
         String userDir = System.getProperty("user.dir");
-        String filePath =  "/" + scanPackage.replaceAll("\\.", "/");
+        String filePath = "/" + scanPackage.replaceAll("\\.", "/");
         File classPath2 = new File(userDir);
 
-        
+        for (File file : classPath.listFiles()) {
+            if (file.isDirectory()) {
+                doScanner(scanPackage + "." + file.getName());
+            } else {
+                if (!file.getName().endsWith(".class")) {
+                    continue;
+                }
+                String beanName = scanPackage + "." + file.getName().replace(".class", "");
+                this.registyBeanClasses.add(beanName);
+            }
+        }
     }
 
 
