@@ -1,12 +1,15 @@
 package com.gupaoedu.vip.spring.formework.beans.support;
 
 
+import com.gupaoedu.vip.spring.formework.annotation.GPController;
+import com.gupaoedu.vip.spring.formework.annotation.GPService;
 import com.gupaoedu.vip.spring.formework.beans.config.GPBeanDefinition;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -93,16 +96,44 @@ public class GPBeanDefinitionReader {
      * 应该是加载到类后，使用反射解析里面的@autowired或者构造器类
      * 1.拿到对应的class类
      * 2.使用反射
+     *
      * @return
      */
     public List<GPBeanDefinition> loadBeanDefinitions() {
-        for(String beanClassName:registyBeanClasses){
-            try {
-                Class<?> loadClass = this.getClass().getClassLoader().loadClass(beanClassName);
-            } catch (ClassNotFoundException e) {
-                log.info(e.getMessage());
+        List<GPBeanDefinition> result = new ArrayList<GPBeanDefinition>();
+        try {
+            for (String beanClassName : registyBeanClasses) {
+                Class<?> loadClass = Class.forName(beanClassName);
+                //如果是一个接口，是不能实例化的
+                //用它实现类来实例化
+                if (loadClass.isInterface()) {
+                    continue;
+                }
+                /**
+                 * 判断类的注解，是否有@GPComponent，@GPService,
+                 */
+                if (loadClass.isAnnotationPresent(GPController.class) || loadClass.isAnnotationPresent(GPService.class)){
+                    result.add(null);
+                }
+
+                //beanName有三种情况:
+                //1、默认是类名首字母小写
+                //2、自定义名字
+                //3、接口注入
             }
+
+        } catch (ClassNotFoundException e) {
+            log.info(e.getMessage());
         }
         return null;
     }
+
+    private boolean isContainsGP(Annotation[] annotations) {
+        for(Annotation annotation:annotations){
+
+        }
+        return false;
+    }
+
 }
+
