@@ -15,6 +15,9 @@ import java.util.Properties;
 @Slf4j
 public class GPBeanDefinitionReader {
 
+    /**
+     * eg：com.gupaoedu.vip.spring.demo.action.MyAction
+     */
     private List<String> registyBeanClasses = new ArrayList<String>();
 
     private Properties config = new Properties();
@@ -87,9 +90,19 @@ public class GPBeanDefinitionReader {
 
     /**
      * 根据已经扫描到的类，将其解析为beanDefinition
+     * 应该是加载到类后，使用反射解析里面的@autowired或者构造器类
+     * 1.拿到对应的class类
+     * 2.使用反射
      * @return
      */
     public List<GPBeanDefinition> loadBeanDefinitions() {
+        for(String beanClassName:registyBeanClasses){
+            try {
+                Class<?> loadClass = this.getClass().getClassLoader().loadClass(beanClassName);
+            } catch (ClassNotFoundException e) {
+                log.info(e.getMessage());
+            }
+        }
         return null;
     }
 }
