@@ -8,12 +8,12 @@ import lombok.Data;
 @Data
 public class GPBeanDefinition {
     /**
-     * bean的全类名
+     * bean的全类名,com.gupaoedu.vip.spring.demo.service.IModifyService
      */
     private String beanClassName;
     private boolean lazyInit = false;
     /**
-     * bean在map中存储的key名称,在工厂中的名称
+     * bean在map中存储的key名称,在工厂中的名称,IModifyService
      */
     private String factoryBeanName;
     private boolean isSingleton = true;
