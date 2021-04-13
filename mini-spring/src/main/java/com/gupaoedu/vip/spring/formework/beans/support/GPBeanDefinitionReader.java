@@ -36,8 +36,7 @@ public class GPBeanDefinitionReader {
          * 具体的内容还需要去读取；而且需要替换路径中的名称
          */
         InputStream inputStream = this.getClass().getClassLoader()
-//                .getResourceAsStream(StringUtils.substringAfter(configLocations[0], ":"));
-                .getResourceAsStream("something");
+                .getResourceAsStream(StringUtils.substringAfter(configLocations[0], ":"));
         try {
             config.load(inputStream);
         } catch (IOException e) {
