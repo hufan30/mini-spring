@@ -13,7 +13,7 @@ public class GPBeanDefinition {
     private String beanClassName;
     private boolean lazyInit = false;
     /**
-     * bean在map中存储的key名称
+     * bean在map中存储的key名称,在工厂中的名称
      */
     private String factoryBeanName;
     private boolean isSingleton = true;

@@ -71,8 +71,8 @@ public class GPBeanDefinitionReader {
         File classPath = new File(url.getFile());
 
         /**
-         * 实验测试版本，filePath拿不到,
-         * user,dir拿到的是工程路径，这里是tomcat的安装路径，不是这个代码工程的路径
+         * 下面为实验测试版本，filePath拿不到,
+         * user.dir拿到的是工程路径，这里是tomcat的安装路径，不是这个代码工程的路径
          */
         String userDir = System.getProperty("user.dir");
         String filePath = "/" + scanPackage.replaceAll("\\.", "/");
@@ -103,29 +103,57 @@ public class GPBeanDefinitionReader {
         List<GPBeanDefinition> result = new ArrayList<GPBeanDefinition>();
         try {
             for (String beanClassName : registyBeanClasses) {
-                Class<?> loadClass = Class.forName(beanClassName);
+                Class<?> beanClass = Class.forName(beanClassName);
                 //如果是一个接口，是不能实例化的
                 //用它实现类来实例化
-                if (loadClass.isInterface()) {
+                if (beanClass.isInterface()) {
                     continue;
                 }
                 /**
                  * 判断类的注解，是否有@GPComponent，@GPService,
+                 * 这里改成只有扫描到注解的才解析beanDefination
+                 * 根据spring，它的父类接口也需要解析
                  */
-                if (loadClass.isAnnotationPresent(GPController.class) || loadClass.isAnnotationPresent(GPService.class)){
-                    result.add(null);
+                //TODO 同原版不一样
+                if (beanClass.isAnnotationPresent(GPController.class) || beanClass.isAnnotationPresent(GPService.class)){
+                    result.add(doCreateBeanDefinition(toLowerFirstCase(beanClass.getSimpleName()), beanClass.getName()));
+                    Class<?>[] interfaces = beanClass.getInterfaces();
+                    /**
+                     * 它的接口父类也要加进去
+                     */
+                    for (Class<?> i : interfaces) {
+                        result.add(doCreateBeanDefinition(i.getSimpleName(),i.getName()));
+                    }
                 }
-
-                //beanName有三种情况:
-                //1、默认是类名首字母小写
-                //2、自定义名字
-                //3、接口注入
             }
 
         } catch (ClassNotFoundException e) {
-            log.info(e.getMessage());
+            log.info(e.getMessage(),e);
         }
-        return null;
+        return result;
+    }
+
+    private GPBeanDefinition doCreateBeanDefinition(String factoryBeanName, String beanClassName) {
+        GPBeanDefinition beanDefinition = new GPBeanDefinition();
+        beanDefinition.setBeanClassName(beanClassName);
+        beanDefinition.setFactoryBeanName(factoryBeanName);
+        return beanDefinition;
+    }
+
+    //如果类名本身是小写字母，确实会出问题
+    //但是我要说明的是：这个方法是我自己用，private的
+    //传值也是自己传，类也都遵循了驼峰命名法
+    //默认传入的值，存在首字母小写的情况，也不可能出现非字母的情况
+
+    //为了简化程序逻辑，就不做其他判断了，大家了解就OK
+    //其实用写注释的时间都能够把逻辑写完了
+    private String toLowerFirstCase(String simpleName) {
+        char[] chars = simpleName.toCharArray();
+        //之所以加，是因为大小写字母的ASCII码相差32，
+        // 而且大写字母的ASCII码要小于小写字母的ASCII码
+        //在Java中，对char做算学运算，实际上就是对ASCII码做算学运算
+        chars[0] += 32;
+        return String.valueOf(chars);
     }
 
     private boolean isContainsGP(Annotation[] annotations) {
