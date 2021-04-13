@@ -22,7 +22,7 @@ public class GPApplicationContext extends GPDefaultListableBeanFactory implement
         try {
             refresh();
         } catch (Exception e) {
-            log.info(e.getMessage());
+            log.info(e.getMessage(),e);
         }
     }
 

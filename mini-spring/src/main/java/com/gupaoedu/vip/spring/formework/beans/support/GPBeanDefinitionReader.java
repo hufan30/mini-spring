@@ -15,9 +15,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.commons.lang3.StringUtils;
+
 @Slf4j
 public class GPBeanDefinitionReader {
 
+//    private static final Logger log = LoggerFactory.getLogger(GPBeanDefinitionReader.class);
     /**
      * eg：com.gupaoedu.vip.spring.demo.action.MyAction
      */
@@ -27,16 +30,18 @@ public class GPBeanDefinitionReader {
 
     private static final String SCAN_PACKAGE = "scanPackage";
 
-    public GPBeanDefinitionReader(String[] configLocations) {
+    public GPBeanDefinitionReader(String... configLocations) {
         /**
          * 这里是从web.xml中穿过来的参数，只是说明classpath:application.properties
-         * 具体的内容还需要去读取；
+         * 具体的内容还需要去读取；而且需要替换路径中的名称
          */
-        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(configLocations[0]);
+        InputStream inputStream = this.getClass().getClassLoader()
+//                .getResourceAsStream(StringUtils.substringAfter(configLocations[0], ":"));
+                .getResourceAsStream("something");
         try {
             config.load(inputStream);
         } catch (IOException e) {
-            log.info(e.getMessage());
+            log.info(e.getMessage(),e);
         } finally {
             /**
              * 注意这里输入输出流，需要关闭close
@@ -115,20 +120,20 @@ public class GPBeanDefinitionReader {
                  * 根据spring，它的父类接口也需要解析
                  */
                 //TODO 同原版不一样
-                if (beanClass.isAnnotationPresent(GPController.class) || beanClass.isAnnotationPresent(GPService.class)){
+                if (beanClass.isAnnotationPresent(GPController.class) || beanClass.isAnnotationPresent(GPService.class)) {
                     result.add(doCreateBeanDefinition(toLowerFirstCase(beanClass.getSimpleName()), beanClass.getName()));
                     Class<?>[] interfaces = beanClass.getInterfaces();
                     /**
                      * 它的接口父类也要加进去
                      */
                     for (Class<?> i : interfaces) {
-                        result.add(doCreateBeanDefinition(i.getSimpleName(),i.getName()));
+                        result.add(doCreateBeanDefinition(i.getSimpleName(), i.getName()));
                     }
                 }
             }
 
         } catch (ClassNotFoundException e) {
-            log.info(e.getMessage(),e);
+            log.info(e.getMessage(), e);
         }
         return result;
     }
@@ -157,7 +162,7 @@ public class GPBeanDefinitionReader {
     }
 
     private boolean isContainsGP(Annotation[] annotations) {
-        for(Annotation annotation:annotations){
+        for (Annotation annotation : annotations) {
 
         }
         return false;
