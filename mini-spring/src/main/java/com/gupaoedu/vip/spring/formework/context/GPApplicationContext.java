@@ -2,6 +2,7 @@ package com.gupaoedu.vip.spring.formework.context;
 
 import com.gupaoedu.vip.spring.formework.beans.GPBeanWrapper;
 import com.gupaoedu.vip.spring.formework.beans.config.GPBeanDefinition;
+import com.gupaoedu.vip.spring.formework.beans.config.GPBeanPostProcessor;
 import com.gupaoedu.vip.spring.formework.beans.support.GPBeanDefinitionReader;
 import com.gupaoedu.vip.spring.formework.beans.support.GPDefaultListableBeanFactory;
 import com.gupaoedu.vip.spring.formework.core.GPBeanFactory;
@@ -76,6 +77,18 @@ public class GPApplicationContext extends GPDefaultListableBeanFactory implement
     @Override
     public Object getBean(String beanName) throws Exception {
         GPBeanDefinition gpBeanDefinition = super.beanDefinitionMap.get(beanName);
+        Object bean = null;
+        //这个逻辑还不严谨，自己可以去参考Spring源码
+        //工厂模式 + 策略模式
+        GPBeanPostProcessor gpBeanPostProcessor = new GPBeanPostProcessor();
+        gpBeanPostProcessor.postProcessBeforeInitialization(bean,beanName);
+
+        bean = instantiateBean(beanName, gpBeanDefinition);
+
+        return null;
+    }
+
+    private Object instantiateBean(String beanName, GPBeanDefinition gpBeanDefinition) {
         return null;
     }
 
