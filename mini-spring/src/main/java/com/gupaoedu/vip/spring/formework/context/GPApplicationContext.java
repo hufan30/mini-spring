@@ -41,6 +41,20 @@ public class GPApplicationContext extends GPDefaultListableBeanFactory implement
         doRegisterBeanDefinition(beanDefinitions);
 
         //4、把不是延时加载的类，有提前初始化
+        doAutowrited();
+    }
+
+    private void doAutowrited() {
+        for (Map.Entry<String, GPBeanDefinition> entry : super.beanDefinitionMap.entrySet()) {
+            String beanName = entry.getKey();
+            if (!entry.getValue().isLazyInit()) {
+                try {
+                    getBean(beanName);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     private void doRegisterBeanDefinition(List<GPBeanDefinition> beanDefinitions) {
@@ -53,6 +67,12 @@ public class GPApplicationContext extends GPDefaultListableBeanFactory implement
         }
     }
 
+    //依赖注入，从这里开始，通过读取BeanDefinition中的信息
+    //然后，通过反射机制创建一个实例并返回
+    //Spring做法是，不会把最原始的对象放出去，会用一个BeanWrapper来进行一次包装
+    //装饰器模式：
+    //1、保留原来的OOP关系
+    //2、我需要对它进行扩展，增强（为了以后AOP打基础）
     @Override
     public Object getBean(String beanName) throws Exception {
         return null;
@@ -60,6 +80,6 @@ public class GPApplicationContext extends GPDefaultListableBeanFactory implement
 
     @Override
     public Object getBean(Class<?> beanClass) throws Exception {
-        return null;
+        return getBean(beanClass.getName());
     }
 }
