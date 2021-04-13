@@ -50,7 +50,7 @@ public class GPBeanDefinitionReader {
                     inputStream.close();
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error(e.getMessage(),e);
             }
         }
         doScanner(config.getProperty(SCAN_PACKAGE));

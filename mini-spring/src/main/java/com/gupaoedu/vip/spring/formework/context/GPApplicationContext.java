@@ -75,6 +75,7 @@ public class GPApplicationContext extends GPDefaultListableBeanFactory implement
     //2、我需要对它进行扩展，增强（为了以后AOP打基础）
     @Override
     public Object getBean(String beanName) throws Exception {
+        GPBeanDefinition gpBeanDefinition = super.beanDefinitionMap.get(beanName);
         return null;
     }
 
