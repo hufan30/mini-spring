@@ -120,13 +120,13 @@ public class GPBeanDefinitionReader {
                  */
                 //TODO 同原版不一样
                 if (beanClass.isAnnotationPresent(GPController.class) || beanClass.isAnnotationPresent(GPService.class)) {
-                    result.add(doCreateBeanDefinition(toLowerFirstCase(beanClass.getSimpleName()), beanClass.getName()));
+                    result.add(doCreateBeanDefinition(toLowerFirstCase(beanClass.getSimpleName()), beanClassName));
                     Class<?>[] interfaces = beanClass.getInterfaces();
                     /**
                      * 它的接口父类也要加进去
                      */
                     for (Class<?> i : interfaces) {
-                        result.add(doCreateBeanDefinition(i.getSimpleName(), i.getName()));
+                        result.add(doCreateBeanDefinition(i.getSimpleName(), beanClassName));
                     }
                 }
             }

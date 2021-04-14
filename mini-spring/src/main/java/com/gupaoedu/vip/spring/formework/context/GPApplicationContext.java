@@ -18,15 +18,20 @@ public class GPApplicationContext extends GPDefaultListableBeanFactory implement
     /**
      * 存放config地址
      */
-    private String[] configLocations;
+    private final String[] configLocations;
     private GPBeanDefinitionReader reader;
+
+    //单例的IOC容器缓存
+    private final Map<String, Object> factoryBeanObjectCache = new ConcurrentHashMap<>();
+    //通用的IOC容器
+    private final Map<String, GPBeanWrapper> factoryBeanInstanceCache = new ConcurrentHashMap<>();
 
     public GPApplicationContext(String... configLocations) {
         this.configLocations = configLocations;
         try {
             refresh();
         } catch (Exception e) {
-            log.info(e.getMessage(),e);
+            log.info(e.getMessage(), e);
         }
     }
 
@@ -60,11 +65,11 @@ public class GPApplicationContext extends GPDefaultListableBeanFactory implement
 
     private void doRegisterBeanDefinition(List<GPBeanDefinition> beanDefinitions) {
         for (GPBeanDefinition beanDefinition : beanDefinitions) {
-            if(super.beanDefinitionMap.containsKey(beanDefinition.getFactoryBeanName())){
-                log.info("已经存在该类名："+beanDefinition.getFactoryBeanName());
+            if (super.beanDefinitionMap.containsKey(beanDefinition.getFactoryBeanName())) {
+                log.info("已经存在该类名：" + beanDefinition.getFactoryBeanName());
                 continue;
             }
-            super.beanDefinitionMap.put(beanDefinition.getFactoryBeanName(),beanDefinition);
+            super.beanDefinitionMap.put(beanDefinition.getFactoryBeanName(), beanDefinition);
         }
     }
 
@@ -79,17 +84,35 @@ public class GPApplicationContext extends GPDefaultListableBeanFactory implement
         GPBeanDefinition gpBeanDefinition = super.beanDefinitionMap.get(beanName);
         Object bean = null;
         //这个逻辑还不严谨，自己可以去参考Spring源码
-        //工厂模式 + 策略模式
+        //工厂模式 + 策略模式,对bean进行预处理
         GPBeanPostProcessor gpBeanPostProcessor = new GPBeanPostProcessor();
-        gpBeanPostProcessor.postProcessBeforeInitialization(bean,beanName);
-
+        gpBeanPostProcessor.postProcessBeforeInitialization(bean, beanName);
+        //基本实例化bean
         bean = instantiateBean(beanName, gpBeanDefinition);
 
-        return null;
+
+        return bean;
     }
 
     private Object instantiateBean(String beanName, GPBeanDefinition gpBeanDefinition) {
-        return null;
+        //1.这里是需要完整的类名来反射实例化；com.gupaoedu.vip.spring.demo.service.IModifyService
+        String beanClassName = gpBeanDefinition.getBeanClassName();
+        //反射实例化，得到一个对象
+        Object instance = null;
+        if (!this.factoryBeanObjectCache.containsKey(beanClassName)) {
+            try {
+                Class<?> beanClass = Class.forName(beanClassName);
+                instance = beanClass.newInstance();
+                //TODO 预留以后AOP的处理
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
+            this.factoryBeanObjectCache.put(beanClassName, instance);
+            this.factoryBeanObjectCache.put(beanName,instance);
+        } else {
+            instance = factoryBeanObjectCache.get(beanName);
+        }
+        return instance;
     }
 
     @Override
