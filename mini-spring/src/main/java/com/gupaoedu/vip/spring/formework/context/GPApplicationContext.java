@@ -23,7 +23,7 @@ public class GPApplicationContext extends GPDefaultListableBeanFactory implement
 
     //单例的IOC容器缓存，这玩意就相当于是个临时的工具，缓存一下bean，目的是为了创建单例bean,从map里面已有的拿现成的，避免重复创建
     private final Map<String, Object> factoryBeanObjectCache = new ConcurrentHashMap<>();
-    //通用的IOC容器
+    //通用的IOC容器,这个才是真正存放实例化后bean的
     private final Map<String, GPBeanWrapper> factoryBeanInstanceCache = new ConcurrentHashMap<>();
 
     public GPApplicationContext(String... configLocations) {
