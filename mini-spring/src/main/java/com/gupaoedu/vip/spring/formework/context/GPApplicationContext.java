@@ -21,7 +21,7 @@ public class GPApplicationContext extends GPDefaultListableBeanFactory implement
     private final String[] configLocations;
     private GPBeanDefinitionReader reader;
 
-    //单例的IOC容器缓存
+    //单例的IOC容器缓存，这玩意就相当于是个临时的工具，缓存一下bean，目的是为了创建单例bean,从map里面已有的拿现成的，避免重复创建
     private final Map<String, Object> factoryBeanObjectCache = new ConcurrentHashMap<>();
     //通用的IOC容器
     private final Map<String, GPBeanWrapper> factoryBeanInstanceCache = new ConcurrentHashMap<>();
@@ -89,6 +89,11 @@ public class GPApplicationContext extends GPDefaultListableBeanFactory implement
         gpBeanPostProcessor.postProcessBeforeInitialization(bean, beanName);
         //基本实例化bean
         bean = instantiateBean(beanName, gpBeanDefinition);
+        //3、把这个对象封装到BeanWrapper中
+        GPBeanWrapper beanWrapper = new GPBeanWrapper(bean);
+        //后置处理
+        //TODO 这里有一个疑问，beanWrpper封装了bean实例，这时候再对bean实例做处理，beanWrapper里面推测应该是会跟着变化的；
+        gpBeanPostProcessor.postProcessAfterInitialization(bean, beanName);
 
 
         return bean;
@@ -99,6 +104,13 @@ public class GPApplicationContext extends GPDefaultListableBeanFactory implement
         String beanClassName = gpBeanDefinition.getBeanClassName();
         //反射实例化，得到一个对象
         Object instance = null;
+        /*
+          这里下面的Cache其实是相当于是个临时的变量，就是为了这个方法循环的时候，避免重复创建实例，创建好了就放到cache里；
+          下次再需要创建的时候，就从map里面先看一下；
+          那为什么不在这里变成临时变量呢？因为循环不是在这里方法里面的，循环是在外层方法，如果是本地循环，可以放这里；
+          外层循环，每次进来cache都new一下的话，那不就废了，所以cache要从外面穿进来，两种思路，一种是变成全局变量，也就是现在这样；直接使用this.cache;
+          还有一种就是在外层方法循环的时候，创建，然后传参一路传进来，相比之下，用全局好像更加直观；
+        */
         if (!this.factoryBeanObjectCache.containsKey(beanClassName)) {
             try {
                 Class<?> beanClass = Class.forName(beanClassName);
@@ -108,7 +120,7 @@ public class GPApplicationContext extends GPDefaultListableBeanFactory implement
                 log.error(e.getMessage(), e);
             }
             this.factoryBeanObjectCache.put(beanClassName, instance);
-            this.factoryBeanObjectCache.put(beanName,instance);
+            this.factoryBeanObjectCache.put(beanName, instance);
         } else {
             instance = factoryBeanObjectCache.get(beanName);
         }
