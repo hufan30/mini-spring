@@ -89,14 +89,22 @@ public class GPApplicationContext extends GPDefaultListableBeanFactory implement
         gpBeanPostProcessor.postProcessBeforeInitialization(bean, beanName);
         //基本实例化bean
         bean = instantiateBean(beanName, gpBeanDefinition);
-        //3、把这个对象封装到BeanWrapper中
-        GPBeanWrapper beanWrapper = new GPBeanWrapper(bean);
         //后置处理
         //TODO 这里有一个疑问，beanWrpper封装了bean实例，这时候再对bean实例做处理，beanWrapper里面推测应该是会跟着变化的；
         gpBeanPostProcessor.postProcessAfterInitialization(bean, beanName);
-
+        //3、把这个对象封装到BeanWrapper中
+        GPBeanWrapper beanWrapper = new GPBeanWrapper(bean);
+        //拿到BeanWraoper之后，把BeanWrapper保存到IOC容器中去
+        this.factoryBeanInstanceCache.put(beanName,beanWrapper);
+        //4、注入
+        populateBean(beanWrapper);
 
         return bean;
+    }
+
+    private void populateBean(GPBeanWrapper beanWrapper) {
+        Object instance = beanWrapper.getWrappedInstance();
+
     }
 
     private Object instantiateBean(String beanName, GPBeanDefinition gpBeanDefinition) {
