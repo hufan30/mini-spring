@@ -22,6 +22,35 @@ public class GPDispatcherServlet extends HttpServlet {
          */
         context = new GPApplicationContext(config.getInitParameter(CONTEXT_CONFIG_LOCATION));
         //2、初始化Spring MVC 九大组件
-//        initStrategies(context);
+        initStrategies(context);
+    }
+
+    //初始化策略
+    private void initStrategies(GPApplicationContext context) {
+        //多文件上传的组件
+        initMultipartResolver(context);
+        //初始化本地语言环境
+        initLocaleResolver(context);
+        //初始化模板处理器
+        initThemeResolver(context);
+
+        //handlerMapping，必须实现
+        initHandlerMappings(context);
+    }
+
+    private void initHandlerMappings(GPApplicationContext context) {
+
+    }
+
+    private void initThemeResolver(GPApplicationContext context) {
+
+    }
+
+    private void initLocaleResolver(GPApplicationContext context) {
+
+    }
+
+    private void initMultipartResolver(GPApplicationContext context) {
+
     }
 }
