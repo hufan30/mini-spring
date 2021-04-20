@@ -132,15 +132,15 @@ public class GPApplicationContext extends GPDefaultListableBeanFactory implement
              * 这里需要名称注入正好是小写开头的名称；
              */
             String autoWiredName = fieldAnnotation.value().trim();
-            if(StringUtils.isBlank(autoWiredName)){
+            if (StringUtils.isBlank(autoWiredName)) {
                 autoWiredName = declaredField.getType().getName();
             }
 
             declaredField.setAccessible(true);
             try {
-                declaredField.set(wrappedInstance,this.factoryBeanInstanceCache.get(autoWiredName).getWrappedInstance());
+                declaredField.set(wrappedInstance, this.factoryBeanInstanceCache.get(autoWiredName).getWrappedInstance());
             } catch (IllegalAccessException e) {
-                log.error(e.getMessage(),e);
+                log.error(e.getMessage(), e);
             }
         }
     }
