@@ -1,5 +1,8 @@
 package com.gupaoedu.vip.spring.formework.context;
 
+import com.gupaoedu.vip.spring.formework.annotation.GPAutowired;
+import com.gupaoedu.vip.spring.formework.annotation.GPController;
+import com.gupaoedu.vip.spring.formework.annotation.GPService;
 import com.gupaoedu.vip.spring.formework.beans.GPBeanWrapper;
 import com.gupaoedu.vip.spring.formework.beans.config.GPBeanDefinition;
 import com.gupaoedu.vip.spring.formework.beans.config.GPBeanPostProcessor;
@@ -7,7 +10,9 @@ import com.gupaoedu.vip.spring.formework.beans.support.GPBeanDefinitionReader;
 import com.gupaoedu.vip.spring.formework.beans.support.GPDefaultListableBeanFactory;
 import com.gupaoedu.vip.spring.formework.core.GPBeanFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -87,7 +92,7 @@ public class GPApplicationContext extends GPDefaultListableBeanFactory implement
         //工厂模式 + 策略模式,对bean进行预处理
         GPBeanPostProcessor gpBeanPostProcessor = new GPBeanPostProcessor();
         gpBeanPostProcessor.postProcessBeforeInitialization(bean, beanName);
-        //基本实例化bean
+        //基本实例化bean,此时还未依赖注入
         bean = instantiateBean(beanName, gpBeanDefinition);
         //后置处理
         //TODO 这里有一个疑问，beanWrpper封装了bean实例，这时候再对bean实例做处理，beanWrapper里面推测应该是会跟着变化的；
@@ -95,18 +100,58 @@ public class GPApplicationContext extends GPDefaultListableBeanFactory implement
         //3、把这个对象封装到BeanWrapper中
         GPBeanWrapper beanWrapper = new GPBeanWrapper(bean);
         //拿到BeanWraoper之后，把BeanWrapper保存到IOC容器中去
-        this.factoryBeanInstanceCache.put(beanName,beanWrapper);
+        this.factoryBeanInstanceCache.put(beanName, beanWrapper);
         //4、注入
         populateBean(beanWrapper);
 
         return bean;
     }
 
+    /**
+     * 给beanWrapper进行注入，依赖注入的具体实现环节
+     *
+     * @param beanWrapper
+     */
     private void populateBean(GPBeanWrapper beanWrapper) {
-        Object instance = beanWrapper.getWrappedInstance();
+        Object wrappedInstance = beanWrapper.getWrappedInstance();
+        Class<?> wrappedClass = beanWrapper.getWrappedClass();
+        //判断只有加了注解的类，才执行依赖注入
+        if (!(wrappedClass.isAnnotationPresent(GPController.class) || wrappedClass.isAnnotationPresent(GPService.class))) {
+            return;
+        }
 
+        Field[] declaredFields = wrappedClass.getDeclaredFields();
+        for (Field declaredField : declaredFields) {
+            if (!declaredField.isAnnotationPresent(GPAutowired.class)) {
+                continue;
+            }
+            GPAutowired fieldAnnotation = declaredField.getAnnotation(GPAutowired.class);
+            /**
+             * 这里是按名称注入，不是按照类型注入
+             * springboot默认是按照类型注入；
+             * 这里需要名称注入正好是小写开头的名称；
+             */
+            String autoWiredName = fieldAnnotation.value().trim();
+            if(StringUtils.isBlank(autoWiredName)){
+                autoWiredName = declaredField.getType().getName();
+            }
+
+            declaredField.setAccessible(true);
+            try {
+                declaredField.set(wrappedInstance,this.factoryBeanInstanceCache.get(autoWiredName).getWrappedInstance());
+            } catch (IllegalAccessException e) {
+                log.error(e.getMessage(),e);
+            }
+        }
     }
 
+    /**
+     * 初步实例化bean,此时还没进行依赖注入
+     *
+     * @param beanName
+     * @param gpBeanDefinition
+     * @return
+     */
     private Object instantiateBean(String beanName, GPBeanDefinition gpBeanDefinition) {
         //1.这里是需要完整的类名来反射实例化；com.gupaoedu.vip.spring.demo.service.IModifyService
         String beanClassName = gpBeanDefinition.getBeanClassName();
@@ -130,7 +175,7 @@ public class GPApplicationContext extends GPDefaultListableBeanFactory implement
             this.factoryBeanObjectCache.put(beanClassName, instance);
             this.factoryBeanObjectCache.put(beanName, instance);
         } else {
-            instance = factoryBeanObjectCache.get(beanName);
+            instance = factoryBeanObjectCache.get(beanClassName);
         }
         return instance;
     }
