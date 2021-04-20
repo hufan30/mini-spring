@@ -28,6 +28,7 @@ public class GPApplicationContext extends GPDefaultListableBeanFactory implement
 
     //单例的IOC容器缓存，这玩意就相当于是个临时的工具，缓存一下bean，目的是为了创建单例bean,从map里面已有的拿现成的，避免重复创建
     private final Map<String, Object> factoryBeanObjectCache = new ConcurrentHashMap<>();
+
     //通用的IOC容器,这个才是真正存放实例化后bean的
     private final Map<String, GPBeanWrapper> factoryBeanInstanceCache = new ConcurrentHashMap<>();
 
@@ -86,6 +87,11 @@ public class GPApplicationContext extends GPDefaultListableBeanFactory implement
     //2、我需要对它进行扩展，增强（为了以后AOP打基础）
     @Override
     public Object getBean(String beanName) throws Exception {
+
+        if(factoryBeanInstanceCache.containsKey(beanName)){
+            return factoryBeanInstanceCache.get(beanName).getWrappedInstance();
+        }
+
         GPBeanDefinition gpBeanDefinition = super.beanDefinitionMap.get(beanName);
         Object bean = null;
         //这个逻辑还不严谨，自己可以去参考Spring源码
@@ -133,7 +139,10 @@ public class GPApplicationContext extends GPDefaultListableBeanFactory implement
              */
             String autoWiredName = fieldAnnotation.value().trim();
             if (StringUtils.isBlank(autoWiredName)) {
-                autoWiredName = declaredField.getType().getName();
+                /**
+                 * 这里如果是接口，使用的是simpleName;
+                 */
+                autoWiredName = declaredField.getType().getSimpleName();
             }
 
             declaredField.setAccessible(true);

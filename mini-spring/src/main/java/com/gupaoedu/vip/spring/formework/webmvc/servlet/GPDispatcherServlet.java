@@ -1,11 +1,17 @@
 package com.gupaoedu.vip.spring.formework.webmvc.servlet;
 
+import com.gupaoedu.vip.spring.formework.annotation.GPController;
+import com.gupaoedu.vip.spring.formework.annotation.GPRequestMapping;
+import com.gupaoedu.vip.spring.formework.beans.config.GPBeanDefinition;
 import com.gupaoedu.vip.spring.formework.context.GPApplicationContext;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
+import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 public class GPDispatcherServlet extends HttpServlet {
@@ -39,6 +45,31 @@ public class GPDispatcherServlet extends HttpServlet {
     }
 
     private void initHandlerMappings(GPApplicationContext context) {
+        /**
+         * 找@GPController，然后根据里面的@GPRequestMapping，映射成处理器；
+         *
+         */
+        Set<String> beanDefinitonMapNames = context.getBeanDefinitonMapNames();
+        try {
+            for (String beanDefinitonMapName : beanDefinitonMapNames) {
+                Object bean = context.getBean(beanDefinitonMapName);
+                Class<?> beanClass = bean.getClass();
+
+                if(!beanClass.isAnnotationPresent(GPController.class)){
+                    continue;
+                }
+                //拿到这个Handler的baseurl
+                String baseUrl = beanClass.getAnnotation(GPRequestMapping.class).value();
+                //拿到具体方法的url;
+                Method[] methods = beanClass.getMethods();
+                for (Method method : methods) {
+
+                }
+
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
 
     }
 
