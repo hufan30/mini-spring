@@ -10,13 +10,17 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 @Slf4j
 public class GPDispatcherServlet extends HttpServlet {
 
     private final String CONTEXT_CONFIG_LOCATION = "contextConfigLocation";
+    private List<GPHandlerMapping> handlerMappings = new ArrayList<GPHandlerMapping>();
 
     private GPApplicationContext context;
 
@@ -52,20 +56,28 @@ public class GPDispatcherServlet extends HttpServlet {
         Set<String> beanDefinitonMapNames = context.getBeanDefinitonMapNames();
         try {
             for (String beanDefinitonMapName : beanDefinitonMapNames) {
-                Object bean = context.getBean(beanDefinitonMapName);
-                Class<?> beanClass = bean.getClass();
+                Object controllerBean = context.getBean(beanDefinitonMapName);
+                Class<?> beanClass = controllerBean.getClass();
 
                 if(!beanClass.isAnnotationPresent(GPController.class)){
                     continue;
                 }
                 //拿到这个Handler的baseurl
-                String baseUrl = beanClass.getAnnotation(GPRequestMapping.class).value();
+                String baseUrl = "";
+                if (beanClass.isAnnotationPresent(GPRequestMapping.class)) {
+                    baseUrl = beanClass.getAnnotation(GPRequestMapping.class).value();
+                }
                 //拿到具体方法的url;
                 Method[] methods = beanClass.getMethods();
                 for (Method method : methods) {
-
+                    if(!method.isAnnotationPresent(GPRequestMapping.class)){
+                        continue;
+                    }
+                    String methodUrl = method.getAnnotation(GPRequestMapping.class).value();
+                    String regex = ("/" + baseUrl + "/" + methodUrl.replaceAll("\\*",".*")).replaceAll("/+", "/");
+                    Pattern pattern = Pattern.compile(regex);
+                    this.handlerMappings.add(new GPHandlerMapping(pattern, controllerBean, method));
                 }
-
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
