@@ -160,12 +160,8 @@ public class GPBeanDefinitionReader {
         return String.valueOf(chars);
     }
 
-    private boolean isContainsGP(Annotation[] annotations) {
-        for (Annotation annotation : annotations) {
-
-        }
-        return false;
+    public Properties getConfig() {
+        return config;
     }
-
 }
 

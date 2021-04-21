@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
+import java.io.File;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -19,6 +20,7 @@ public class GPDispatcherServlet extends HttpServlet {
     private final String CONTEXT_CONFIG_LOCATION = "contextConfigLocation";
     private List<GPHandlerMapping> handlerMappings = new ArrayList<>();
     private List<GPHandlerAdapter> handlerAdapters = new ArrayList();
+    private List<GPViewResolver> viewResolvers = new ArrayList<GPViewResolver>();
 
     private GPApplicationContext context;
 
@@ -46,6 +48,41 @@ public class GPDispatcherServlet extends HttpServlet {
         initHandlerMappings(context);
         //初始化参数适配器，必须实现
         initHandlerAdapters(context);
+
+        //初始化异常拦截器
+        initHandlerExceptionResolvers(context);
+        //初始化视图预处理器
+        initRequestToViewNameTranslator(context);
+
+        //初始化视图转换器，必须实现
+        initViewResolvers(context);
+        //参数缓存器
+        initFlashMapManager(context);
+    }
+
+    private void initFlashMapManager(GPApplicationContext context) {
+        //这里是从加载的config,也就是applicaiton.properties中拿配置项
+        String templateRoot = context.getConfig().getProperty("templateRoot");
+        //Application.properties中配置了视图所处的文件夹名称，拿到对应文件夹的路径名称
+        String templateRootPath = context.getClass().getClassLoader().getResource(templateRoot).getFile();
+        //根据文件夹路径名称，拿到文件
+        File templateRootDir = new File(templateRootPath);
+        //这里其实用一个viewResolver就可以搞定
+        //只是为了模拟真实，根据文件夹下有几个文件，不同文件按理说对应不同的view解析器
+        String[] layouts = templateRootDir.list();
+        for (String layout : layouts) {
+            GPViewResolver gpViewResolver = new GPViewResolver(templateRootDir);
+        }
+    }
+
+    private void initViewResolvers(GPApplicationContext context) {
+
+    }
+
+    private void initRequestToViewNameTranslator(GPApplicationContext context) {
+    }
+
+    private void initHandlerExceptionResolvers(GPApplicationContext context) {
     }
 
     private void initHandlerMappings(GPApplicationContext context) {

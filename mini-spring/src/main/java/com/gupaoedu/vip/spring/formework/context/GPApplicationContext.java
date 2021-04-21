@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
@@ -192,5 +193,9 @@ public class GPApplicationContext extends GPDefaultListableBeanFactory implement
     @Override
     public Object getBean(Class<?> beanClass) throws Exception {
         return getBean(beanClass.getName());
+    }
+
+    public Properties getConfig(){
+        return this.reader.getConfig();
     }
 }
