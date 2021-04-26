@@ -1,6 +1,7 @@
 package com.gupaoedu.vip.spring.formework.webmvc.servlet;
 
 import com.gupaoedu.vip.spring.formework.annotation.GPRequestParam;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -42,12 +43,24 @@ public class GPHandlerAdapter {
         HashMap<String, Integer> paramIndexMapping = new HashMap<>();
 
         Annotation[][] pa = handlerMapping.getMethod().getParameterAnnotations();
-        for (Annotation[] annotations : pa) {
-            for (Annotation annotation : annotations) {
-
+        /**
+         * 先提取GPRequestParam这样的参数项
+         */
+        for (int i = 0; i < pa.length; i++) {
+            for (Annotation annotation : pa[i]) {
+                if(annotation instanceof GPRequestParam){
+                    String param = ((GPRequestParam) annotation).value();
+                    if(StringUtils.isNotBlank(param)){
+                        paramIndexMapping.put(param,i);
+                    }
+                }
             }
         }
-
+        /**
+         * 然后从形参里面提取httpRequest相关的参数项
+         */
+        handlerMapping.getMethod().getParameterTypes();
+        handlerMapping.getMethod().getParameters();
         return null;
     }
 
