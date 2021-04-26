@@ -22,9 +22,9 @@ public class GPHandlerAdapter {
         return (handler instanceof GPHandlerMapping);
     }
 
-
     /**
      * 核心处理逻辑，下面来体会一下，为什么需要一个专门的逻辑方法来处理；
+     *
      * @param request
      * @param response
      * @param handler
@@ -32,6 +32,22 @@ public class GPHandlerAdapter {
      * @throws Exception
      */
     GPModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        //第一步，先强转handler回原本的类，后续各种提取参数都需要从handlerMapping中提取；
+        GPHandlerMapping handlerMapping = (GPHandlerMapping) handler;
+        /**
+         * 用于存储方法中形参的列表，从本地实体方法中提取，不是从Request中
+         * key是形参的名称
+         * value是形参在参数列表中的顺序
+         */
+        HashMap<String, Integer> paramIndexMapping = new HashMap<>();
+
+        Annotation[][] pa = handlerMapping.getMethod().getParameterAnnotations();
+        for (Annotation[] annotations : pa) {
+            for (Annotation annotation : annotations) {
+
+            }
+        }
+
         return null;
     }
 
