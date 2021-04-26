@@ -48,10 +48,10 @@ public class GPHandlerAdapter {
          */
         for (int i = 0; i < pa.length; i++) {
             for (Annotation annotation : pa[i]) {
-                if(annotation instanceof GPRequestParam){
+                if (annotation instanceof GPRequestParam) {
                     String param = ((GPRequestParam) annotation).value();
-                    if(StringUtils.isNotBlank(param)){
-                        paramIndexMapping.put(param,i);
+                    if (StringUtils.isNotBlank(param)) {
+                        paramIndexMapping.put(param, i);
                     }
                 }
             }
@@ -59,8 +59,13 @@ public class GPHandlerAdapter {
         /**
          * 然后从形参里面提取httpRequest相关的参数项
          */
-        handlerMapping.getMethod().getParameterTypes();
-        handlerMapping.getMethod().getParameters();
+        Class<?>[] parameterTypes = handlerMapping.getMethod().getParameterTypes();
+        for (int i = 0; i < parameterTypes.length; i++) {
+            Class<?> type = parameterTypes[i];
+            if (type == (HttpServletRequest.class) || type == HttpServletResponse.class) {
+                paramIndexMapping.put(type.getName(), i);
+            }
+        }
         return null;
     }
 
