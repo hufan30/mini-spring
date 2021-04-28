@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,14 +36,25 @@ public class GPHandlerAdapter {
     GPModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         //第一步，先强转handler回原本的类，后续各种提取参数都需要从handlerMapping中提取；
         GPHandlerMapping handlerMapping = (GPHandlerMapping) handler;
-        /**
-         * 用于存储方法中形参的列表，从本地实体方法中提取，不是从Request中
-         * key是形参的名称
-         * value是形参在参数列表中的顺序
-         */
-        HashMap<String, Integer> paramIndexMapping = new HashMap<>();
 
+        /**
+         * 从形参里面提取参数的顺序信息，比如name这个形参在第几个参数，age这个参数在第几个
+         */
         Annotation[][] pa = handlerMapping.getMethod().getParameterAnnotations();
+        /**
+         * 然后从形参里面提取形参的类型type信息，比如name形参是string，age这个参数是int
+         */
+        Class<?>[] paramsTypes = handlerMapping.getMethod().getParameterTypes();
+        /**
+         * 下面开始准备实参
+         * 首先实参个数和类型要和形参对应上
+         * 从方法的形参中获取参数列表长度，根据传入的Request向里面填实参
+         */
+        Object[] paramResult = new Object[paramsTypes.length];
+        /**
+         * 从Request中获取实参的map,下面根据paramIndexMapping向实参列表里面填入实际参数
+         */
+        Map paramFromRequest = request.getParameterMap();
         /**
          * 先提取GPRequestParam这样的参数项
          */
@@ -51,21 +63,32 @@ public class GPHandlerAdapter {
                 if (annotation instanceof GPRequestParam) {
                     String param = ((GPRequestParam) annotation).value();
                     if (StringUtils.isNotBlank(param)) {
-                        paramIndexMapping.put(param, i);
+                        String value = paramFromRequest.get(param).toString();
+                        paramResult[i] = caseStringValue(value,paramsTypes[i]);
                     }
                 }
             }
         }
-        /**
-         * 然后从形参里面提取httpRequest相关的参数项
-         */
-        Class<?>[] parameterTypes = handlerMapping.getMethod().getParameterTypes();
-        for (int i = 0; i < parameterTypes.length; i++) {
-            Class<?> type = parameterTypes[i];
-            if (type == (HttpServletRequest.class) || type == HttpServletResponse.class) {
-                paramIndexMapping.put(type.getName(), i);
+
+        for (int i = 0; i < paramsTypes.length; i++) {
+            Class<?> type = paramsTypes[i];
+            if (type == (HttpServletRequest.class) ) {
+            }
+            if (type == HttpServletResponse.class){
+
             }
         }
+
+
+
+
+
+        Method method = handlerMapping.getMethod();
+//        method.invoke(handlerMapping.getController(),request,response,)
+        return null;
+    }
+
+    private Object caseStringValue(String value, Class<?> paramsType) {
         return null;
     }
 
