@@ -56,15 +56,16 @@ public class GPHandlerAdapter {
          */
         Map paramFromRequest = request.getParameterMap();
         /**
-         * 先提取GPRequestParam这样的参数项
+         * 先提取GPRequestParam这样的参数项,在参数列表中排在第几位
+         * 然后从paramFromRequest中找到对应的参数，放在对应的顺序位置
          */
         for (int i = 0; i < pa.length; i++) {
             for (Annotation annotation : pa[i]) {
                 if (annotation instanceof GPRequestParam) {
                     String param = ((GPRequestParam) annotation).value();
                     if (StringUtils.isNotBlank(param)) {
-                        String value = paramFromRequest.get(param).toString();
-                        paramResult[i] = caseStringValue(value,paramsTypes[i]);
+                        String valueFromRequest = paramFromRequest.get(param).toString();
+                        paramResult[i] = caseStringValue(valueFromRequest,paramsTypes[i]);
                     }
                 }
             }
@@ -72,24 +73,41 @@ public class GPHandlerAdapter {
 
         for (int i = 0; i < paramsTypes.length; i++) {
             Class<?> type = paramsTypes[i];
-            if (type == (HttpServletRequest.class) ) {
-            }
-            if (type == HttpServletResponse.class){
-
+            if (type == HttpServletRequest.class) {
+                paramResult[i] = request;
+            } else if (type == HttpServletResponse.class){
+                paramResult[i] = response;
             }
         }
 
 
-
-
-
         Method method = handlerMapping.getMethod();
-//        method.invoke(handlerMapping.getController(),request,response,)
+        Object result = method.invoke(handlerMapping.getController(), paramResult);
+        if(result == null || result instanceof Void){ return null; }
+
+        boolean isModelAndView = handlerMapping.getMethod().getReturnType() == GPModelAndView.class;
+        if(isModelAndView){
+            return (GPModelAndView) result;
+        }
         return null;
     }
 
     private Object caseStringValue(String value, Class<?> paramsType) {
-        return null;
+        if(String.class == paramsType){
+            return value;
+        }
+        //如果是int
+        if(Integer.class == paramsType){
+            return Integer.valueOf(value);
+        }
+        else if(Double.class == paramsType){
+            return Double.valueOf(value);
+        }else {
+            if(value != null){
+                return value;
+            }
+            return null;
+        }
     }
 
 }
