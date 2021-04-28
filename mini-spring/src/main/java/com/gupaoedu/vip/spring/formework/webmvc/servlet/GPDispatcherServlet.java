@@ -67,7 +67,11 @@ public class GPDispatcherServlet extends HttpServlet {
         //2、准备调用前的参数,真的有准备参数吗？感觉只是拿到对应的HandlerAdapter
         GPHandlerAdapter ha = getHandlerAdapter(handler);
 
-        GPModelAndView handle = ha.handle(req, resp, handler);
+        //3、真正的调用方法,返回ModelAndView存储了要穿页面上值，和页面模板的名称
+        GPModelAndView mv = ha.handle(req, resp, handler);
+
+        //这一步才是真正的输出
+        processDispatchResult(req, resp, mv);
     }
 
     private GPHandlerAdapter getHandlerAdapter(GPHandlerMapping handler) {
@@ -151,6 +155,7 @@ public class GPDispatcherServlet extends HttpServlet {
         String[] layouts = templateRootDir.list();
         for (String layout : layouts) {
             GPViewResolver gpViewResolver = new GPViewResolver(templateRootDir);
+            this.viewResolvers.add(gpViewResolver);
         }
     }
 

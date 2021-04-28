@@ -54,7 +54,7 @@ public class GPHandlerAdapter {
         /**
          * 从Request中获取实参的map,下面根据paramIndexMapping向实参列表里面填入实际参数
          */
-        Map paramFromRequest = request.getParameterMap();
+        Map<String,String[]> paramFromRequest = request.getParameterMap();
         /**
          * 先提取GPRequestParam这样的参数项,在参数列表中排在第几位
          * 然后从paramFromRequest中找到对应的参数，放在对应的顺序位置
@@ -64,8 +64,9 @@ public class GPHandlerAdapter {
                 if (annotation instanceof GPRequestParam) {
                     String param = ((GPRequestParam) annotation).value();
                     if (StringUtils.isNotBlank(param)) {
-                        String valueFromRequest = paramFromRequest.get(param).toString();
-                        paramResult[i] = caseStringValue(valueFromRequest,paramsTypes[i]);
+                        String valueFromRequest = Arrays.toString(paramFromRequest.get(param)).replaceAll("\\[|\\]","")
+                                .replaceAll("\\s",",");
+                        paramResult[i] = caseStringValue(valueFromRequest, paramsTypes[i]);
                     }
                 }
             }
@@ -75,7 +76,7 @@ public class GPHandlerAdapter {
             Class<?> type = paramsTypes[i];
             if (type == HttpServletRequest.class) {
                 paramResult[i] = request;
-            } else if (type == HttpServletResponse.class){
+            } else if (type == HttpServletResponse.class) {
                 paramResult[i] = response;
             }
         }
@@ -83,30 +84,31 @@ public class GPHandlerAdapter {
 
         Method method = handlerMapping.getMethod();
         Object result = method.invoke(handlerMapping.getController(), paramResult);
-        if(result == null || result instanceof Void){ return null; }
+        if (result == null || result instanceof Void) {
+            return null;
+        }
 
         boolean isModelAndView = handlerMapping.getMethod().getReturnType() == GPModelAndView.class;
-        if(isModelAndView){
+        if (isModelAndView) {
             return (GPModelAndView) result;
         }
         return null;
     }
 
     private Object caseStringValue(String value, Class<?> paramsType) {
-        if(String.class == paramsType){
+        if (String.class == paramsType) {
             return value;
         }
         //如果是int
-        if(Integer.class == paramsType){
+        if (Integer.class == paramsType) {
             return Integer.valueOf(value);
-        }
-        else if(Double.class == paramsType){
+        } else if (Double.class == paramsType) {
             return Double.valueOf(value);
-        }else {
-            if(value != null){
+        } else {
+            if (value != null) {
                 return value;
             }
-            return null;
+            return "unkown";
         }
     }
 
