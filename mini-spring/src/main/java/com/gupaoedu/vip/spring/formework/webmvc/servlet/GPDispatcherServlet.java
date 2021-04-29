@@ -2,7 +2,6 @@ package com.gupaoedu.vip.spring.formework.webmvc.servlet;
 
 import com.gupaoedu.vip.spring.formework.annotation.GPController;
 import com.gupaoedu.vip.spring.formework.annotation.GPRequestMapping;
-import com.gupaoedu.vip.spring.formework.beans.config.GPBeanDefinition;
 import com.gupaoedu.vip.spring.formework.context.GPApplicationContext;
 import lombok.extern.slf4j.Slf4j;
 
