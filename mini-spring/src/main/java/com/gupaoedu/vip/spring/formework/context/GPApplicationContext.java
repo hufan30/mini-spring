@@ -164,7 +164,7 @@ public class GPApplicationContext extends GPDefaultListableBeanFactory implement
      */
     private Object instantiateBean(String beanName, GPBeanDefinition gpBeanDefinition) {
         //1.这里是需要完整的类名来反射实例化；com.gupaoedu.vip.spring.demo.service.IModifyService
-        String beanClassName = gpBeanDefinition.getBeanClassName();
+        String beanFullClassName = gpBeanDefinition.getBeanClassName();
         //反射实例化，得到一个对象
         Object instance = null;
         /*
@@ -174,18 +174,20 @@ public class GPApplicationContext extends GPDefaultListableBeanFactory implement
           外层循环，每次进来cache都new一下的话，那不就废了，所以cache要从外面穿进来，两种思路，一种是变成全局变量，也就是现在这样；直接使用this.cache;
           还有一种就是在外层方法循环的时候，创建，然后传参一路传进来，相比之下，用全局好像更加直观；
         */
-        if (!this.factoryBeanObjectCache.containsKey(beanClassName)) {
+        if (!this.factoryBeanObjectCache.containsKey(beanFullClassName)) {
             try {
-                Class<?> beanClass = Class.forName(beanClassName);
+                Class<?> beanClass = Class.forName(beanFullClassName);
                 instance = beanClass.newInstance();
                 //TODO 预留以后AOP的处理
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
             }
-            this.factoryBeanObjectCache.put(beanClassName, instance);
+
+
+            this.factoryBeanObjectCache.put(beanFullClassName, instance);
             this.factoryBeanObjectCache.put(beanName, instance);
         } else {
-            instance = factoryBeanObjectCache.get(beanClassName);
+            instance = factoryBeanObjectCache.get(beanFullClassName);
         }
         return instance;
     }
