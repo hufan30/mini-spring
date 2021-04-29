@@ -23,6 +23,8 @@ public class GPBeanDefinitionReader {
 //    private static final Logger log = LoggerFactory.getLogger(GPBeanDefinitionReader.class);
     /**
      * eg：com.gupaoedu.vip.spring.demo.action.MyAction
+     * 这里是初始化Reader的时候，把扫描到的类添加到list中，但是还没变成BeanDefinition
+     * 注意，这里的类是扫描到的所有类，后面变成BeanDefintion的时候，才进行判断是否有@Component等注解；
      */
     private List<String> registyBeanClasses = new ArrayList<String>();
 
