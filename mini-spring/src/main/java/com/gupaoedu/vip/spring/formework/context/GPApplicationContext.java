@@ -99,7 +99,10 @@ public class GPApplicationContext extends GPDefaultListableBeanFactory implement
         //工厂模式 + 策略模式,对bean进行预处理
         GPBeanPostProcessor gpBeanPostProcessor = new GPBeanPostProcessor();
         gpBeanPostProcessor.postProcessBeforeInitialization(bean, beanName);
-        //基本实例化bean,此时还未依赖注入
+        /**
+         * 2.基本实例化bean,此时还未依赖注入
+         * 实例化的时候，完成AOP的代理，此时出来的bean已经是AOP代理后的
+         */
         bean = instantiateBean(beanName, gpBeanDefinition);
         //后置处理
         //TODO 这里有一个疑问，beanWrpper封装了bean实例，这时候再对bean实例做处理，beanWrapper里面推测应该是会跟着变化的；
@@ -108,7 +111,9 @@ public class GPApplicationContext extends GPDefaultListableBeanFactory implement
         GPBeanWrapper beanWrapper = new GPBeanWrapper(bean);
         //拿到BeanWraoper之后，把BeanWrapper保存到IOC容器中去
         this.factoryBeanInstanceCache.put(beanName, beanWrapper);
-        //4、注入
+        /**
+         * 4.这里是注入@AutoWired,前面已经AOP代理完成了
+         */
         populateBean(beanWrapper);
 
         return bean;
