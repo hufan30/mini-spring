@@ -1,6 +1,7 @@
 package com.gupaoedu.vip.spring.formework.aop.support;
 
 import com.gupaoedu.vip.spring.formework.aop.config.GPAopConfig;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -13,6 +14,7 @@ import java.util.regex.Pattern;
 /**
  * Created by Tom on 2019/4/14.
  */
+@Slf4j
 public class GPAdvisedSupport {
 
     private Class<?> targetClass;
@@ -58,10 +60,43 @@ public class GPAdvisedSupport {
                 .replaceAll("\\(", "\\\\(")
                 .replaceAll("\\)", "\\\\)");
         //pointCut=public .* com.gupaoedu.vip.spring.demo.service..*Service..*(.*)
-        //玩正则
+        /**
+         * 1.给本类的正则表达式赋值，从成员变量中的config获取相关信息；
+         */
         String pointCutForClassRegex = pointCut.substring(0, pointCut.lastIndexOf("\\(") - 4);
         pointCutClassPattern = Pattern.compile("class " + pointCutForClassRegex.substring(
                 pointCutForClassRegex.lastIndexOf(" ") + 1));
+
+        Pattern pattern = Pattern.compile(pointCut);
+        methodCache = new HashMap<Method, List<Object>>();
+
+        /**
+         * 2.从config中获取targetClass的method信息
+         */
+        try {
+            Class<?> aspectClass = Class.forName(config.getAspectClass());
+            Map<String,Method> aspectMethods = new HashMap<String,Method>();
+            for (Method m : aspectClass.getMethods()) {
+                aspectMethods.put(m.getName(),m);
+            }
+
+            /**
+             * 3.从成员变量targetClass中获取method信息，同从config中获取的method信息对比
+             */
+            for (Method m : targetClass.getMethods()) {
+                String methodString = m.toString();
+                /**
+                 * 这里目前不太清楚为什么包含throws就需要截取methodString
+                 */
+                if (methodString.contains("throws")) {
+                    methodString = methodString.substring(0, methodString.lastIndexOf("throws")).trim();
+                }
+
+                Matcher matcher = pattern.matcher(methodString);
+            }
+        } catch (ClassNotFoundException e) {
+            log.error(e.getMessage(),e);
+        }
 
 
     }
