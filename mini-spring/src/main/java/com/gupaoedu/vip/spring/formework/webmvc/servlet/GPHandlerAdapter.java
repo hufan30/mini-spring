@@ -81,8 +81,12 @@ public class GPHandlerAdapter {
             }
         }
 
-
         Method method = handlerMapping.getMethod();
+        /**
+         * *****************************************
+         * 真正的核心，实际反射调用handler处理方法
+         * *****************************************
+         */
         Object result = method.invoke(handlerMapping.getController(), paramResult);
         if (result == null || result instanceof Void) {
             return null;
