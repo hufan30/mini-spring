@@ -91,8 +91,10 @@ public class GPAdvisedSupport {
                 if (methodString.contains("throws")) {
                     methodString = methodString.substring(0, methodString.lastIndexOf("throws")).trim();
                 }
-
                 Matcher matcher = pattern.matcher(methodString);
+                if(matcher.matches()){
+                    
+                }
             }
         } catch (ClassNotFoundException e) {
             log.error(e.getMessage(),e);
