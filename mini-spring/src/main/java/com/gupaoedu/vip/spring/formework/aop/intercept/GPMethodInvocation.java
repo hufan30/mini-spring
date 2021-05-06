@@ -9,6 +9,7 @@ import java.util.Map;
 
 /**
  * Created by Tom on 2019/4/14.
+ * 执行拦截器链，相当于Spring中的ReflectiveMethodInvocation功能
  */
 public class GPMethodInvocation implements GPJoinPoint {
 
