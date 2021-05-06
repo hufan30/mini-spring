@@ -17,9 +17,10 @@ public class GPMethodInvocation implements GPJoinPoint {
     private Method method;
     private Object target;
     private Object [] arguments;
+    //回调的方法链，从GPAdvisedSupport中获取
     private List<Object> interceptorsAndDynamicMethodMatchers;
     private Class<?> targetClass;
-
+    //保存自定义属性
     private Map<String, Object> userAttributes;
 
     //定义一个索引，从-1开始来记录当前拦截器执行的位置
