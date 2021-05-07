@@ -7,6 +7,8 @@ import java.lang.reflect.Method;
  * 使用模板设计GPAdstractAspectJAdvice类，封装拦截器回调的通用逻辑，在本mini-spring中拦截器主要是实现aop，本质还是代理的invoke
  * 这里就是描述了拦截器回调的通用逻辑，用大白话就是拦截器只是用成员变量保存了反射的对象和方法，这里用invoke去真正调用
  * 这个反射的对象和方法，不一定是target，也可能是你自定义的aop的前置或者后置方法；
+ *
+ * 子类则是控制调用顺序，具体的调用逻辑在骨架这里实现
  */
 public abstract class GPAbstractAspectAdvice implements GPAdvice {
     private Method aspectMethod;
