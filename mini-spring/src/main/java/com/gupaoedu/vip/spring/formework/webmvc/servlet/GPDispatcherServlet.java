@@ -193,6 +193,7 @@ public class GPDispatcherServlet extends HttpServlet {
                     String regex = ("/" + baseUrl + "/" + methodUrl.replaceAll("\\*", ".*")).replaceAll("/+", "/");
                     Pattern pattern = Pattern.compile(regex);
                     this.handlerMappings.add(new GPHandlerMapping(pattern, controllerBean, method));
+                    log.info("Mapped " + regex + "," + method);
                 }
             }
         } catch (Exception e) {

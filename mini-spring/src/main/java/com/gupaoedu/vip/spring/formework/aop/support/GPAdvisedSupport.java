@@ -1,5 +1,8 @@
 package com.gupaoedu.vip.spring.formework.aop.support;
 
+import com.gupaoedu.vip.spring.formework.aop.aspect.GPAfterReturningAdviceInterceptor;
+import com.gupaoedu.vip.spring.formework.aop.aspect.GPAfterThrowingAdviceInterceptor;
+import com.gupaoedu.vip.spring.formework.aop.aspect.GPMethodBeforeAdviceInterceptor;
 import com.gupaoedu.vip.spring.formework.aop.config.GPAopConfig;
 import lombok.extern.slf4j.Slf4j;
 
@@ -77,9 +80,9 @@ public class GPAdvisedSupport {
          */
         try {
             Class<?> aspectClass = Class.forName(config.getAspectClass());
-            Map<String,Method> aspectMethods = new HashMap<String,Method>();
+            Map<String, Method> aspectMethods = new HashMap<String, Method>();
             for (Method m : aspectClass.getMethods()) {
-                aspectMethods.put(m.getName(),m);
+                aspectMethods.put(m.getName(), m);
             }
 
             /**
@@ -94,12 +97,35 @@ public class GPAdvisedSupport {
                     methodString = methodString.substring(0, methodString.lastIndexOf("throws")).trim();
                 }
                 Matcher matcher = pattern.matcher(methodString);
-                if(matcher.matches()){
-
+                if (matcher.matches()) {
+                    //执行器链
+                    List<Object> advices = new LinkedList<Object>();
+                    //把每一个方法包装成 MethodIterceptor
+                    //before
+                    if (!(null == config.getAspectBeforeMethod() || "".equals(config.getAspectBeforeMethod()))) {
+                        //创建一个Advivce
+                        advices.add(new GPMethodBeforeAdviceInterceptor(aspectMethods.get(config.getAspectBeforeMethod()), aspectClass.newInstance()));
+                    }
+                    //after
+                    if (!(null == config.getAspectAfterMethod() || "".equals(config.getAspectAfterMethod()))) {
+                        //创建一个Advivce
+                        advices.add(new GPAfterReturningAdviceInterceptor(aspectMethods.get(config.getAspectAfterMethod()), aspectClass.newInstance()));
+                    }
+                    //afterThrowing
+                    if (!(null == config.getAspectAfterThrowMethod() || "".equals(config.getAspectAfterThrowMethod()))) {
+                        //创建一个Advivce
+                        GPAfterThrowingAdviceInterceptor throwingAdvice =
+                                new GPAfterThrowingAdviceInterceptor(
+                                        aspectMethods.get(config.getAspectAfterThrowMethod()),
+                                        aspectClass.newInstance());
+                        throwingAdvice.setThrowName(config.getAspectAfterThrowingType());
+                        advices.add(throwingAdvice);
+                    }
+                    methodCache.put(m, advices);
                 }
             }
-        } catch (ClassNotFoundException e) {
-            log.error(e.getMessage(),e);
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+            log.error(e.getMessage(), e);
         }
 
 

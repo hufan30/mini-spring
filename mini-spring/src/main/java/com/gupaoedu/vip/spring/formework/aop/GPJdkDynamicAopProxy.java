@@ -31,6 +31,11 @@ public class GPJdkDynamicAopProxy implements GPAopProxy, InvocationHandler {
 
     /**
      * 执行代理的关键入口
+     * 这里是为什么AOP能生效的入口，本来没有用aop的时候，bean就是bean，在HandlerAdapter中invoke方法的时候是直接去了target方法
+     * 但是现在在初始化bean，也就是applicationContext里面，此时初始化出来的bean就是$Proxy了
+     * 比如mini-spring中的MyAction，里面的service，如果没有aop就直接调用service的方法，但是现在注入MyAction的service是$Proxy
+     * 在执行对于的controller方法的时候，是来到这里；
+     *
      * @param proxy
      * @param method
      * @param args
